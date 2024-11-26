@@ -1,0 +1,40 @@
+-- Disable cutscenes by detecting and blocking specific functions
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerScripts = player:WaitForChild("PlayerScripts")
+
+-- Function to disable the cutscene system (customize this to your game's cutscene implementation)
+local function DisableCutscene()
+    -- Check if there is a CutsceneService (or similar service) or cutscene objects you want to disable
+    -- For example, if you are using TweenService to create cutscenes, we can block it as well
+    
+    -- Block Tweening (this might be part of some cutscenes)
+    local tweenService = game:GetService("TweenService")
+    local mt = getmetatable(tweenService)
+    local oldIndex = mt.__index
+    mt.__index = function(self, key)
+        if key == "Create" then
+            return function() return end -- Block the Create method that runs cutscenes
+        else
+            return oldIndex(self, key)
+        end
+    end
+    
+    -- Block or remove any specific cutscene events or components in your game
+    -- For example, if cutscenes are triggered by a custom event, block it here
+    local cutsceneEvent = game.ReplicatedStorage:FindFirstChild("CutsceneEvent")
+    if cutsceneEvent then
+        cutsceneEvent.OnClientEvent:Connect(function()
+            print("Cutscene blocked!")
+            -- Prevent the cutscene event from executing
+        end)
+    end
+    
+    -- Additional custom logic based on how the cutscenes are implemented can go here
+end
+
+-- Disable any cutscene logic
+DisableCutscene()
+
+-- Optionally, you can listen for other triggers or monitor certain components that may enable cutscenes
